@@ -18,6 +18,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from sklearn.model_selection import train_test_split
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -157,12 +159,32 @@ def visualise(df):
     _correlation_matrix(df, cols_to_visualise)
 
 
+def _split_data(df, target_col):
+    """
+
+    :param df:
+    :return:
+    """
+    test_size = st.sidebar.slider(
+        label='Select the proportion of the input data to use for testing',
+        min_value=0.05,
+        max_value=0.95,
+        step=0.05,
+        value=0.3
+    )
+    X_train, X_test, y_train, y_test = train_test_split(df.drop(target_col, axis=1),
+                                                        df[target_col],
+                                                        test_size=test_size,
+                                                        random_state=1)
+    return X_train, X_test, y_train, y_test
+
 def model(df):
     """
     Model
     :return:
     """
-    st.write(df.head())
+    target_col = st.sidebar.selectbox('Select target column:', sorted(df.columns))
+    X_train, X_test, y_train, y_test = _split_data(df, target_col)
 
 if __name__ == "__main__":
     LOGGER.info("Starting...")
