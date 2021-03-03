@@ -20,6 +20,15 @@ import seaborn as sns
 
 from sklearn.model_selection import train_test_split
 
+from sklearn import preprocessing
+
+
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import GridSearchCV
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -172,19 +181,36 @@ def _split_data(df, target_col):
         step=0.05,
         value=0.3
     )
-    X_train, X_test, y_train, y_test = train_test_split(df.drop(target_col, axis=1),
-                                                        df[target_col],
+    X_train, X_test, y_train, y_test = train_test_split(df.drop(target_col, axis=1).values,
+                                                        df[target_col].values.ravel(),
                                                         test_size=test_size,
                                                         random_state=1)
     return X_train, X_test, y_train, y_test
+
 
 def model(df):
     """
     Model
     :return:
     """
+    st.write(df.head())
+
     target_col = st.sidebar.selectbox('Select target column:', sorted(df.columns))
     X_train, X_test, y_train, y_test = _split_data(df, target_col)
+
+    lin_model = LinearRegression()
+    lin_model.fit(X_train, y_train)
+
+    y_train_predict = lin_model.predict(X_train)
+
+    rmse = (np.sqrt(mean_squared_error(y_train, y_train_predict)))
+    r2 = r2_score(y_train, y_train_predict)
+
+    st.write("The model performance for training set")
+    st.write("--------------------------------------")
+    st.write('RMSE is {}'.format(rmse))
+    st.write('R2 score is {}'.format(r2))
+
 
 if __name__ == "__main__":
     LOGGER.info("Starting...")
