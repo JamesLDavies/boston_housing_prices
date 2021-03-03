@@ -8,6 +8,9 @@ from sklearn.datasets import load_boston
 import numpy as np
 import pandas as pd
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 LOGGER = logging.getLogger(__name__)
 
@@ -63,6 +66,18 @@ def _data_exploration(df, target_col):
     print(f'Standard deviation {target_col}: {np.std(target)}')
 
 
+def _exploratory_data_analysis(df):
+    """
+
+    :param df:
+    :return:
+    """
+    LOGGER.info("Plotting data")
+    sns.pairplot(df, height=2.5)
+    plt.tight_layout()
+    plt.show()
+
+
 def run():
     """
     Main ENTRYPOINT function
@@ -76,6 +91,7 @@ def run():
     input_df = _load_data()
     _preprocessing(input_df)
     _data_exploration(input_df, 'target')
+    _exploratory_data_analysis(input_df)
 
 if __name__ == "__main__":
     LOGGER.info("Starting...")
