@@ -81,13 +81,15 @@ def _preprocessing(df):
         print(null_df)
 
 
-def _data_exploration(df, target_col):
+def _data_exploration(df):
     """
     Calculate useful statistics
     :param df:
     :return:
     """
     LOGGER.info("Calculating statistics")
+    st.title("Please select col for statistical info:")
+    target_col = st.selectbox('Target Col:', sorted(df.columns))
     target = df[target_col]
     st.title(f'Statistics for {target_col} column:')
     st.write(f'Min {target_col}: {np.amin(target)}')
@@ -103,6 +105,7 @@ def _pick_cols_to_visualise(df):
     :param df:
     :return:
     """
+    st.title("Choose cols to visualise")
     cols_to_plot = []
     for col in df.columns:
         plot = st.checkbox(f'Plot {col}?')
@@ -132,11 +135,11 @@ def _correlation_matrix(df, cols):
     :return:
     """
     LOGGER.info("Creating correlation matrix")
+    st.title('Correlation between features')
     if len(cols) < 2:
         st.write("Not enough cols selected for correlation matrix!")
     else:
         corr_matrix = np.corrcoef(df[cols].T)
-        st.title('Correlation between features')
         fig = plt.figure()
         heatmap = sns.heatmap(
             corr_matrix,
@@ -161,8 +164,7 @@ def visualise(df):
         None
     """
     _preprocessing(df)
-    target_col = st.selectbox('Target Col:', sorted(df.columns))
-    _data_exploration(df, target_col)
+    _data_exploration(df)
     cols_to_visualise = _pick_cols_to_visualise(df)
     _create_scatter_matrix(df, cols_to_visualise)
     _correlation_matrix(df, cols_to_visualise)
@@ -193,8 +195,6 @@ def model(df):
     Model
     :return:
     """
-    st.write(df.head())
-
     target_col = st.sidebar.selectbox('Select target column:', sorted(df.columns))
     X_train, X_test, y_train, y_test = _split_data(df, target_col)
 
@@ -206,10 +206,9 @@ def model(df):
     rmse = (np.sqrt(mean_squared_error(y_train, y_train_predict)))
     r2 = r2_score(y_train, y_train_predict)
 
-    st.write("The model performance for training set")
-    st.write("--------------------------------------")
-    st.write('RMSE is {}'.format(rmse))
-    st.write('R2 score is {}'.format(r2))
+    st.title("The model performance for training set")
+    st.write(f'RMSE is {rmse}')
+    st.write(f'R2 score is {r2}')
 
 
 if __name__ == "__main__":
