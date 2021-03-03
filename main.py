@@ -1,6 +1,13 @@
 """
 Module Docstring
+
+Usage:
+* pip3 install -r requirements.txt
+* streamlit run main.py
 """
+import plotly.express as px
+import streamlit as st
+
 import logging
 
 from sklearn.datasets import load_boston
@@ -13,6 +20,14 @@ import seaborn as sns
 
 
 LOGGER = logging.getLogger(__name__)
+
+st.set_page_config(
+    page_title='James Davies Boston Housing Prices ML Dashboard',
+    layout='wide'
+)
+
+st.sidebar.title('James Davies Boston Housing Prices ML Dashboard')
+st.sidebar.write('This is a Machine Learning dashboard')
 
 
 def _load_data():
@@ -66,16 +81,24 @@ def _data_exploration(df, target_col):
     print(f'Standard deviation {target_col}: {np.std(target)}')
 
 
-def _exploratory_data_analysis(df):
+def _create_scatter_matrix(df):
     """
+    Visualise the data
 
-    :param df:
-    :return:
+    Args:
+      df (Pandas DataFrame)
+
+    Returns:
+      None
     """
-    LOGGER.info("Plotting data")
-    sns.pairplot(df, height=2.5)
-    plt.tight_layout()
-    plt.show()
+    st.write("Scatter Matrix")
+    cols_to_plot = []
+    for col in df.columns:
+        plot = st.checkbox(f'Plot {col}?')
+        if plot:
+            cols_to_plot.append(col)
+
+    st.plotly_chart(px.scatter_matrix(df[cols_to_plot]))
 
 
 def run():
@@ -90,8 +113,7 @@ def run():
     """
     input_df = _load_data()
     _preprocessing(input_df)
-    _data_exploration(input_df, 'target')
-    _exploratory_data_analysis(input_df)
+    _create_scatter_matrix(input_df)
 
 if __name__ == "__main__":
     LOGGER.info("Starting...")
