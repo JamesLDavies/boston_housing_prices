@@ -78,15 +78,29 @@ def _data_exploration(df, target_col):
     """
     LOGGER.info("Calculating statistics")
     target = df[target_col]
-    print(f'Statistics for {target_col} column:')
-    print(f'Min {target_col}: {np.amin(target)}')
-    print(f'Max {target_col}: {np.amax(target)}')
-    print(f'Mean {target_col}: {np.mean(target)}')
-    print(f'Median {target_col}: {np.median(target)}')
-    print(f'Standard deviation {target_col}: {np.std(target)}')
+    st.title(f'Statistics for {target_col} column:')
+    st.write(f'Min {target_col}: {np.amin(target)}')
+    st.write(f'Max {target_col}: {np.amax(target)}')
+    st.write(f'Mean {target_col}: {np.mean(target)}')
+    st.write(f'Median {target_col}: {np.median(target)}')
+    st.write(f'Standard deviation {target_col}: {np.std(target)}')
 
 
-def _create_scatter_matrix(df):
+def _pick_cols_to_visualise(df):
+    """
+
+    :param df:
+    :return:
+    """
+    cols_to_plot = []
+    for col in df.columns:
+        plot = st.checkbox(f'Plot {col}?')
+        if plot:
+            cols_to_plot.append(col)
+    return cols_to_plot
+
+
+def _create_scatter_matrix(df, cols_to_plot):
     """
     Visualise the data
 
@@ -96,14 +110,33 @@ def _create_scatter_matrix(df):
     Returns:
       None
     """
-    st.write("Scatter Matrix")
-    cols_to_plot = []
-    for col in df.columns:
-        plot = st.checkbox(f'Plot {col}?')
-        if plot:
-            cols_to_plot.append(col)
-
+    st.title('Scatter Matrix')
     st.plotly_chart(px.scatter_matrix(df[cols_to_plot]))
+
+
+def _correlation_matrix(df, cols):
+    """
+
+    :param df:
+    :return:
+    """
+    LOGGER.info("Creating correlation matrix")
+    if len(cols) < 2:
+        st.write("Not enough cols selected for correlation matrix!")
+    else:
+        corr_matrix = np.corrcoef(df[cols].T)
+        st.title('Correlation between features')
+        fig = plt.figure()
+        heatmap = sns.heatmap(
+            corr_matrix,
+            fmt='.2f',
+            annot=True,
+            annot_kws={'size': 15},
+            square=True,
+            yticklabels=cols,
+            xticklabels=cols
+        )
+        st.pyplot(fig)
 
 
 def visualise(df):
@@ -117,7 +150,11 @@ def visualise(df):
         None
     """
     _preprocessing(df)
-    _create_scatter_matrix(df)
+    target_col = st.selectbox('Target Col:', sorted(df.columns))
+    _data_exploration(df, target_col)
+    cols_to_visualise = _pick_cols_to_visualise(df)
+    _create_scatter_matrix(df, cols_to_visualise)
+    _correlation_matrix(df, cols_to_visualise)
 
 
 def model(df):
