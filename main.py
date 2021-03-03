@@ -29,8 +29,13 @@ st.set_page_config(
 st.sidebar.title('James Davies Boston Housing Prices ML Dashboard')
 st.sidebar.write('This is a Machine Learning dashboard')
 
+dashboard_function = st.sidebar.selectbox(
+    label="Dashboard function",
+    options=["Visualise", "Model"]
+)
 
-def _load_data():
+
+def load_data():
     """
     Load data
 
@@ -101,7 +106,7 @@ def _create_scatter_matrix(df):
     st.plotly_chart(px.scatter_matrix(df[cols_to_plot]))
 
 
-def run():
+def visualise(df):
     """
     Main ENTRYPOINT function
 
@@ -111,11 +116,22 @@ def run():
     Returns:
         None
     """
-    input_df = _load_data()
-    _preprocessing(input_df)
-    _create_scatter_matrix(input_df)
+    _preprocessing(df)
+    _create_scatter_matrix(df)
+
+
+def model(df):
+    """
+    Model
+    :return:
+    """
+    st.write(df.head())
 
 if __name__ == "__main__":
     LOGGER.info("Starting...")
-    run()
+    input_df = load_data()
+    if dashboard_function == 'Visualise':
+        visualise(input_df)
+    elif dashboard_function == 'Model':
+        model(input_df)
     LOGGER.info("Finished")
