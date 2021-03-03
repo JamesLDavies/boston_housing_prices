@@ -20,14 +20,10 @@ import seaborn as sns
 
 from sklearn.model_selection import train_test_split
 
-from sklearn import preprocessing
-
 
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.model_selection import GridSearchCV
 
 
 LOGGER = logging.getLogger(__name__)
@@ -153,6 +149,20 @@ def _correlation_matrix(df, cols):
         st.pyplot(fig)
 
 
+def _plot_distribution(df):
+    """
+
+    :param df:
+    :return:
+    """
+    st.title('Correlation between features')
+    st.title("Please select col for correlation:")
+    col = st.selectbox('Target Col:', sorted(df.columns))
+    fig = plt.figure()
+    sns.distplot(df[col], axlabel=col)
+    st.pyplot(fig)
+
+
 def visualise(df):
     """
     Main ENTRYPOINT function
@@ -164,6 +174,7 @@ def visualise(df):
         None
     """
     _preprocessing(df)
+    _plot_distribution(df)
     _data_exploration(df)
     cols_to_visualise = _pick_cols_to_visualise(df)
     _create_scatter_matrix(df, cols_to_visualise)
