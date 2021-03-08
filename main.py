@@ -1,5 +1,5 @@
 """
-Module Docstring
+Boston Housing Prices Machine Learning Dashboard
 
 Usage:
 * pip3 install -r requirements.txt
@@ -20,13 +20,13 @@ import seaborn as sns
 
 from sklearn.model_selection import train_test_split
 
-
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 
 
 LOGGER = logging.getLogger(__name__)
+
 
 st.set_page_config(
     page_title='James Davies Boston Housing Prices ML Dashboard',
@@ -59,14 +59,18 @@ def load_data():
 
     # Add target col
     df['target'] = boston_dataset['target']
-    return df
+    return df, boston_dataset['DESCR']
 
 
 def _preprocessing(df):
     """
+    Check for NULLs in input data
 
-    :param df:
-    :return:
+    Args:
+        df (DataFrame)
+
+    Returns:
+        None
     """
     LOGGER.info("Preprocessing")
     null_df = df.isnull().sum()
@@ -80,12 +84,16 @@ def _preprocessing(df):
 def _data_exploration(df):
     """
     Calculate useful statistics
-    :param df:
-    :return:
+
+    Args:
+        df (DataFrame)
+
+    Returns:
+        None
     """
     LOGGER.info("Calculating statistics")
     st.title("Please select col for statistical info:")
-    target_col = st.selectbox('Target Col:', sorted(df.columns))
+    target_col = st.selectbox('Col:', sorted(df.columns))
     target = df[target_col]
     st.title(f'Statistics for {target_col} column:')
     st.write(f'Min {target_col}: {np.amin(target)}')
@@ -97,9 +105,13 @@ def _data_exploration(df):
 
 def _pick_cols_to_visualise(df):
     """
+    Allow the user to choose what cols they'd like to visualise
 
-    :param df:
-    :return:
+    Args:
+        df (DataFrame)
+
+    Returns:
+        cols_to_plot (List[String]) - list of user selected cols to plot
     """
     st.title("Choose cols to visualise")
     cols_to_plot = []
@@ -112,10 +124,12 @@ def _pick_cols_to_visualise(df):
 
 def _create_scatter_matrix(df, cols_to_plot):
     """
-    Visualise the data
+    Produce a scatter matrix
+    Allow the user to select which cols to plot
 
     Args:
       df (Pandas DataFrame)
+      cols_to_plot(List[String]) - list of cols to plot
 
     Returns:
       None
@@ -126,6 +140,12 @@ def _create_scatter_matrix(df, cols_to_plot):
 
 def _correlation_matrix(df, cols):
     """
+    Produce a correlation matrix
+    Allow the user to select which cols to plot
+
+    Args:
+        df (DataFrame)
+        cols (List[String]) - cols to plot
 
     :param df:
     :return:
@@ -151,9 +171,13 @@ def _correlation_matrix(df, cols):
 
 def _plot_distribution(df):
     """
+    Plot a distribution plot of the target column
 
-    :param df:
-    :return:
+    Args:
+        df (DataFrame)
+
+    Returns:
+        None
     """
     st.title('Correlation between features')
     st.title("Please select col for correlation:")
@@ -163,16 +187,18 @@ def _plot_distribution(df):
     st.pyplot(fig)
 
 
-def visualise(df):
+def visualise(df, data_desc):
     """
-    Main ENTRYPOINT function
+    Visualise entrypoint function
 
     Args:
-        None
+        df (DataFrame) - input boston dataframe
+        data_desc (string) - description of input data
 
     Returns:
         None
     """
+    st.write(data_desc)
     _preprocessing(df)
     _plot_distribution(df)
     _data_exploration(df)
@@ -183,9 +209,17 @@ def visualise(df):
 
 def _split_data(df, target_col):
     """
+    Split data into testing and training
 
-    :param df:
-    :return:
+    Args:
+      df (dataframe)
+      target_col (string) - target column
+
+    Returns:
+        X_train
+        X_test
+        y_train
+        y_test
     """
     test_size = st.sidebar.slider(
         label='Select the proportion of the input data to use for testing',
@@ -203,8 +237,13 @@ def _split_data(df, target_col):
 
 def model(df):
     """
-    Model
-    :return:
+    Model entrypoint function
+
+    Args:
+        df (DataFrame)
+
+    Returns:
+        None
     """
     target_col = st.sidebar.selectbox('Select target column:', sorted(df.columns))
     X_train, X_test, y_train, y_test = _split_data(df, target_col)
@@ -224,9 +263,9 @@ def model(df):
 
 if __name__ == "__main__":
     LOGGER.info("Starting...")
-    input_df = load_data()
+    input_df, data_desc = load_data()
     if dashboard_function == 'Visualise':
-        visualise(input_df)
+        visualise(input_df, data_desc)
     elif dashboard_function == 'Model':
         model(input_df)
     LOGGER.info("Finished")
